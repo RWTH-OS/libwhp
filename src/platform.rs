@@ -156,7 +156,7 @@ impl Partition {
     }
 
     pub fn create_virtual_processor(
-        &mut self,
+        &self,
         index: UINT32,
     ) -> Result<VirtualProcessor, WHPError> {
         check_result(unsafe {
