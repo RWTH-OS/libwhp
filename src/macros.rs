@@ -13,6 +13,7 @@
 // under the License.
 
 // Based on https://github.com/retep998/winapi-rs/blob/becb23f4522bec535fdc3417e7c15b390851f2de/src/macros.rs#L308-L326
+
 macro_rules! bitfield {
     ($base:ident $field:ident: $fieldtype:ty [
         $($thing:ident $set_thing:ident[$r:expr],)+
@@ -20,13 +21,17 @@ macro_rules! bitfield {
         impl $base {$(
             #[inline]
             #[allow(non_snake_case)]
+            #[allow(arithmetic_overflow)]
             pub fn $thing(&self) -> $fieldtype {
                 let size = $crate::std::mem::size_of::<$fieldtype>() * 8;
+                // FIXME: allow arithmetic_overflow only removes the error message. I think the issue with 64-bit bitfields remains.
                 self.$field << (size - $r.end) >> (size - $r.end + $r.start)
             }
             #[inline]
             #[allow(non_snake_case)]
+            #[allow(arithmetic_overflow)]
             pub fn $set_thing(&mut self, val: $fieldtype) {
+                // FIXME Possible issue with overflowing left shift for 64-bit bitfields
                 let mask = ((1 << ($r.end - $r.start)) - 1) << $r.start;
                 self.$field &= !mask;
                 self.$field |= (val << $r.start) & mask;
